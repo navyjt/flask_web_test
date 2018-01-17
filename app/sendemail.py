@@ -9,7 +9,7 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 
-
+#此函数用来封装正确的邮箱地址
 def _format_addr(s):
     name, addr = parseaddr(s)
     return formataddr((Header(name, 'utf-8').encode(), addr))
@@ -27,6 +27,7 @@ def send_email(to, subject, template, **kwargs):
     print(app.config['MAIL_SERVER'],app.config['MAIL_PORT'])
 
     smtpserver = smtplib.SMTP_SSL(app.config['MAIL_SERVER'],app.config['MAIL_PORT'])
+    # qq和163邮箱均不支持startssl（）函数
     smtpserver.ehlo()
     # smtpserver.startssl()
     smtpserver.ehlo()
@@ -51,6 +52,7 @@ def send_email(to, subject, template, **kwargs):
     print(msg)
     print('###################################')
 
+    # 多线程调用
     thr = Thread(target=send_async_email, args=[app,smtpserver,fromaddress,toaddress,msg.as_string()])
     thr.start()
     return thr
