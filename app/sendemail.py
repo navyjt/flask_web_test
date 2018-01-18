@@ -1,4 +1,4 @@
-
+#coding:utf-8
 from threading import Thread
 from flask import current_app, render_template
 import smtplib
@@ -7,6 +7,7 @@ from email.mime.text import MIMEText
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from email.utils import parseaddr, formataddr
 
 #此函数用来封装正确的邮箱地址
@@ -22,9 +23,8 @@ def send_async_email(app,smtpserver,fromaddress,toaddress,msg):
 
 
 def send_email(to, subject, template, **kwargs):
-    app = current_app._get_current_object()
 
-    print(app.config['MAIL_SERVER'],app.config['MAIL_PORT'])
+    app = current_app._get_current_object()
 
     smtpserver = smtplib.SMTP_SSL(app.config['MAIL_SERVER'],app.config['MAIL_PORT'])
     # qq和163邮箱均不支持startssl（）函数
@@ -41,16 +41,19 @@ def send_email(to, subject, template, **kwargs):
     header = header + 'From:' + fromaddress +'\n'
     header = header + 'Subject:' +subject + '\n'
   
-    body = render_template(template + '.txt', **kwargs)
-    msg = MIMEText(body, 'plain', 'utf-8')
+    msg=MIMEMultipart()
 
+    body = render_template(template + '.txt', **kwargs)
+    
+    #此处一定要设置为gb2312，才能解决邮件正文的中文显示问题
+    body = MIMEText(body, 'plain', 'gb2312')
+
+    # body.set_charset("utf-8")
     msg['From'] = _format_addr('Python用户 <%s>' % fromaddress)
     msg['To'] = _format_addr('管理员 <%s>' % toaddress)
     msg['Subject'] = Header(subject, 'utf-8').encode()
 
-    print('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-    print(msg)
-    print('###################################')
+    msg.attach(body)
 
     # 多线程调用
     thr = Thread(target=send_async_email, args=[app,smtpserver,fromaddress,toaddress,msg.as_string()])
