@@ -2,6 +2,8 @@ import os
 class Config:
 	SECRET_KEY = os.environ.get('SECRET_KEY') or 'laomaizi secretkey'
 	SQLALCHEMY_COMMIT_ON_TEARDOWN = True
+	#此句禁用了SQLALCHEMY_TRACK_MODIFICATIONS报错
+	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
 	FLASKY_MAIL_SENDER = 'Laomaizi <20778688@qq.com>'
 	FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN') or 'navyjt@163.com'

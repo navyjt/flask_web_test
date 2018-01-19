@@ -9,6 +9,7 @@ from flask import render_template,redirect,request,url_for,flash,current_app
 from flask_login import login_user,logout_user,login_required,current_user
 from . import auth
 from .. import db
+from ..tdebug import Tdebug
 from ..models import User
 from ..sendemail import send_email
 from .forms import LoginForm, RegistrationForm
@@ -31,13 +32,14 @@ def unconfirmed():
     return render_template('auth/unconfirmed.html')
 @auth.route('/login',methods=['GET','POST'])
 def login():
+    td = Tdebug()
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email = form.email.data).first()
         if user is not None and user.verify_password(form.password.data):
-            print('\n\n====开始登录=======\n\n')
+            td.pr('开始登录')
             login_user(user,form.remember_me.data)
-            print('\n\n====登录函数执行结束=======\n\n')
+            td.pr('登录函数执行结束')
             next = request.args.get('next')
             if next is None or not next.startswith('/'):
                 next = url_for('main.index')
